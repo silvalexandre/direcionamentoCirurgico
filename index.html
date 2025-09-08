@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direcionamento de Cirurgia - Uppercase</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .main-controls {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 20px; margin-bottom: 25px;
+        }
+
+        #globalSearchInput {
+            flex-grow: 1; min-width: 250px; padding: 12px;
+            border: 1px solid #ccc; border-radius: 5px; font-size: 16px;
+        }
+
+        #addProcedureBtn {
+            padding: 12px 25px; background-color: #28a745; color: white;
+            border: none; border-radius: 5px; cursor: pointer; font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #addProcedureBtn:hover { background-color: #218838; }
+
+        .tables-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .table-card { border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: #fff; flex-grow: 1; min-width: 320px; display: flex; flex-direction: column; }
+        .card-header { padding: 10px 15px; background-color: var(--light-gray); border-bottom: 1px solid #ddd; }
+        .card-header h2 { text-align: center; color: var(--dark-gray); margin: 10px 0; }
+        .table-wrapper { overflow-x: auto; flex-grow: 1; }
+        
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        
+        th, td {
+            padding: 8px 15px; text-align: left;
+            border-bottom: 1px solid #eee;
+            height: auto; min-height: 45px;
+            vertical-align: top;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        thead th { background-color: var(--dark-gray); color: white; position: sticky; top: 0; user-select: none; }
+
+        .procedure-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 0; min-height: 35px;
+        }
+        .procedure-actions {
+            display: flex; gap: 5px; visibility: hidden; opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        td:hover .procedure-actions,
+        tr:hover .procedure-actions {
+            visibility: visible; opacity: 1;
+        }
+        .procedure-actions button {
+            padding: 5px 10px; border: none; border-radius: 4px; color: white; cursor: pointer;
+        }
+        .edit-btn { background-color: var(--warning-color); }
+        .delete-btn { background-color: var(--danger-color); }
+
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 500px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group select, .form-group input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+        .modal-footer { text-align: right; border-top: 1px solid #ccc; padding-top: 20px; margin-top: 20px; }
+        #saveProcedureBtn { padding: 10px 20px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <h1>Direcionamento de Cirurgia</h1>
+
+    <div class="main-controls">
+        <input type="text" id="globalSearchInput" placeholder="Buscar em toda a página...">
+        <button id="addProcedureBtn">Novo Procedimento</button>
+    </div>
+    
+    <div class="tables-container" id="tablesContainer">
+        </div>
+
+    <div class="modal-backdrop" id="procedureModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Adicionar Novo Procedimento</h3>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="procedureCategory">Categoria</label>
+                    <select id="procedureCategory"></select>
+                </div>
+                <div class="form-group">
+                    <label for="procedureName">Nome do Procedimento</label>
+                    <input type="text" id="procedureName" placeholder="Ex: Nefrectomia">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProcedureBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let proceduresData = {
+        "Urologia": {
+            "UROLOGIA PEQUENO": ["VASECTOMIA", "POSTECTOMIA", "CISTOSCOPIA", "VARICOCELE", "HIDROCELE"],
+            "UROLOGIA MÉDIO": ["MEATOPLASTIA", "PROSTATECTOMIA", "CISTOTOMIA", "ORQUIECTOMIA", "URETERORRENOLITOTRIPSIA", "NEFRECTOMIA TOTAL", "URETROTOMIA", "RTU DE PRÓSTATA", "LOMBOTOMIA"],
+            "UROLOGIA GRANDE": ["RADICAL DE PRÓSTATA", "NEFRECTOMIA", "PIELOPLASTIA", "RTU DE PRÓSTATA", "DEEXOCP"]
+        },
+        "Procedimentos Gerais": {
+            "PEQUENO PROCEDIMENTO": ["DRENAGEM DE ABCESSO", "BRONCOSCOPIA", "VARIZES", "EXERESE DE TUMOR DE PELE", "RECONSTRUÇÃO COM RETALHO MICUTÂNEO", "ENXERTO DE PELE", "EXCISÃO E SUTURA DE LESÃO NA PELE EM Z OU ROTACA", "Linfadenectomia inguinal"],
+            "CÁRDIO": ["REVASCULARIZAÇÃO", "IMPLANTE DE PROTESE VALVAR"],
+            "DESBRIDAMENTO": ["CURATIVO/DESBRIDAMENTO", "RESSUTURA DE PAREDE"]
+        },
+        "Outras Especialidades": { "EXODONTIA": ["EXODONTIA"], "TQT": ["TRAQUEOSTOMIA"], "NEURO": ["MICROCIRURGIA PARA TUMOR/ANEURISMA INTRACRANIANO/CRANIOTOMIA", "ARTRODESE CERVICAL", "DISCECTOMIA CERVICAL/LOMBAR", "RIZOTOMIA"], "OTORRINO": ["AMIGDALECTOMIA", "MASTOIDECTOMIA", "TIREOIDECTOMIA", "SINUSECTOMIA"], "AMPUTAÇÃO": ["AMPUTAÇÃO"], "CPRE": ["COLANGIOPANCREATOGRAFIA"] },
+        "Plástica e Bucomaxilo": { "PLÁSTICA": ["MAMÁRIA"], "BUCOMAXILO": ["QUIELOPLASTIA"] },
+        "Cirurgia Geral e Vascular": { "CABEÇA E PESCOÇO": ["TIREOIDECTOMIA", "RESSECÇÃO DA REGIÃO CRANIO E BUCO"], "CVL": ["COLECISTECTOMIA VIDEOLAPAROSCÓPICA", "HERNIA/CVL"], "LAPAROTOMIA": ["ENTEROANASTOMOSE", "GASTROPLASTIA", "DUODENOPANCREATECTOMIA", "CORREÇÃO DE ANEURISMA DA AORTA ABDOMINAL"], "FISTULA VENOSA": ["FISTULA/ENEDINO"], "FISTULA ANAL": ["HEMORROIDECTOMIA", "PROCTOLOGIA"], "HERNIA": ["GERAL/MÉDIA/HERNIA"] }
+    };
+
+    const modal = document.getElementById('procedureModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const categorySelect = document.getElementById('procedureCategory');
+    const nameInput = document.getElementById('procedureName');
+    const saveBtn = document.getElementById('saveProcedureBtn');
+    const tablesContainer = document.getElementById('tablesContainer');
+    let editContext = null;
+
+    function renderTables(dataToRender) {
+        tablesContainer.innerHTML = '';
+        if (Object.keys(dataToRender).length === 0) {
+            tablesContainer.innerHTML = '<p style="text-align: center; width: 100%;">Nenhum resultado encontrado.</p>';
+            return;
+        }
+
+        for (const cardTitle in dataToRender) {
+            const cardData = dataToRender[cardTitle];
+            const columns = Object.keys(cardData);
+            
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'table-card';
+            cardDiv.innerHTML = `<div class="card-header"><h2>${cardTitle}</h2></div><div class="table-wrapper"><table><thead><tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr></thead><tbody></tbody></table></div>`;
+            tablesContainer.appendChild(cardDiv);
+
+            const tbody = cardDiv.querySelector('tbody');
+            const maxRows = Math.max(0, ...columns.map(col => cardData[col] ? cardData[col].length : 0));
+
+            for (let i = 0; i < maxRows; i++) {
+                const tr = document.createElement('tr');
+                for (const col of columns) {
+                    const td = document.createElement('td');
+                    const procedure = cardData[col] ? cardData[col][i] : undefined;
+                    if (procedure) {
+                        td.innerHTML = `<div class="procedure-item"><span class="procedure-name">${procedure}</span><div class="procedure-actions"><button class="edit-btn" data-card="${cardTitle}" data-category="${col}" data-index="${i}">Editar</button><button class="delete-btn" data-card="${cardTitle}" data-category="${col}" data-index="${i}">Excluir</button></div></div>`;
+                    }
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+        }
+    }
+    
+    function populateCategorySelect() {
+        categorySelect.innerHTML = '';
+        for (const cardTitle in proceduresData) {
+            for (const category in proceduresData[cardTitle]) {
+                const option = document.createElement('option');
+                option.value = `${cardTitle}|${category}`;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            }
+        }
+    }
+
+    const openModal = () => modal.style.display = 'flex';
+    const closeModal = () => { modal.style.display = 'none'; editContext = null; };
+
+    document.getElementById('addProcedureBtn').addEventListener('click', () => {
+        modalTitle.textContent = 'Adicionar Novo Procedimento';
+        nameInput.value = '';
+        categorySelect.selectedIndex = 0;
+        editContext = null;
+        openModal();
+    });
+
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    saveBtn.addEventListener('click', () => {
+        const [cardTitle, category] = categorySelect.value.split('|');
+        // --- ALTERAÇÃO APLICADA AQUI ---
+        const procedureName = nameInput.value.trim().toUpperCase();
+        
+        if (!procedureName) return alert('Por favor, insira o nome.');
+
+        if (editContext) {
+            const { oldCard, oldCategory, index } = editContext;
+            proceduresData[oldCard][oldCategory].splice(index, 1);
+            if (!proceduresData[cardTitle][category]) {
+                proceduresData[cardTitle][category] = [];
+            }
+            proceduresData[cardTitle][category].push(procedureName);
+        } else {
+            proceduresData[cardTitle][category].push(procedureName);
+        }
+        
+        document.getElementById('globalSearchInput').value = '';
+        renderTables(proceduresData);
+        closeModal();
+    });
+
+    tablesContainer.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
+
+        const { card, category, index } = button.dataset;
+        if (!card) return;
+
+        const procedureIndex = parseInt(index, 10);
+        
+        if (button.classList.contains('edit-btn')) {
+            const procedureName = proceduresData[card][category][procedureIndex];
+            modalTitle.textContent = 'Editar Procedimento';
+            nameInput.value = procedureName;
+            categorySelect.value = `${card}|${category}`;
+            editContext = { oldCard: card, oldCategory: category, index: procedureIndex };
+            openModal();
+        }
+
+        if (button.classList.contains('delete-btn')) {
+            const procedureName = proceduresData[card][category][procedureIndex];
+            if (confirm(`Tem certeza que deseja excluir "${procedureName}"?`)) {
+                proceduresData[card][category].splice(procedureIndex, 1);
+                document.getElementById('globalSearchInput').value = '';
+                renderTables(proceduresData);
+            }
+        }
+    });
+
+    document.getElementById('globalSearchInput').addEventListener('keyup', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+
+        if (!searchTerm) {
+            renderTables(proceduresData);
+            return;
+        }
+        const filteredData = {};
+        for (const cardTitle in proceduresData) {
+            for (const category in proceduresData[cardTitle]) {
+                const matchingProcedures = proceduresData[cardTitle][category].filter(procedure =>
+                    procedure.toLowerCase().includes(searchTerm)
+                );
+                if (matchingProcedures.length > 0) {
+                    if (!filteredData[cardTitle]) {
+                        filteredData[cardTitle] = {};
+                    }
+                    filteredData[cardTitle][category] = matchingProcedures;
+                }
+            }
+        }
+        renderTables(filteredData);
+    });
+
+    populateCategorySelect();
+    renderTables(proceduresData);
+});
+</script>
+
+</body>
+</html>
