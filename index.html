@@ -1,322 +1,390 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direcionamento de Cirurgia - Versão Completa</title>
+    <title>Direcionamento de Cirurgia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #007BFF;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --light-gray: #f8f9fa;
-            --dark-gray: #343a40;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            background-color: #f4f7f9;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
         }
-
-        .main-controls {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 20px; margin-bottom: 25px; padding: 0 10px;
+        /* Estilo para a barra de rolagem */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-
-        #globalSearchInput {
-            flex-grow: 1; min-width: 250px; padding: 12px;
-            border: 1px solid #ccc; border-radius: 5px; font-size: 16px;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
         }
-
-        #addProcedureBtn {
-            padding: 12px 25px; background-color: #28a745; color: white;
-            border: none; border-radius: 5px; cursor: pointer; font-size: 16px;
-            transition: background-color 0.3s;
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
         }
-        #addProcedureBtn:hover { background-color: #218838; }
-        
-        #resetDataBtn {
-            padding: 12px 25px; background-color: var(--danger-color); color: white;
-            border: none; border-radius: 5px; cursor: pointer; font-size: 16px;
-            transition: background-color 0.3s;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
-        #resetDataBtn:hover { background-color: #c82333; }
-
-        .tables-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        .table-card { border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: #fff; flex-grow: 1; min-width: 320px; display: flex; flex-direction: column; }
-        .card-header { padding: 10px 15px; background-color: var(--light-gray); border-bottom: 1px solid #ddd; }
-        .card-header h2 { text-align: center; color: var(--dark-gray); margin: 10px 0; }
-        .table-wrapper { overflow-x: auto; flex-grow: 1; }
-        
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        
-        th, td {
-            padding: 8px 15px; text-align: left;
-            border-bottom: 1px solid #eee;
-            height: auto; min-height: 45px;
-            vertical-align: top;
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        thead th { background-color: var(--dark-gray); color: white; position: sticky; top: 0; user-select: none; }
-
-        .procedure-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; min-height: 35px; }
-        .procedure-actions { display: flex; gap: 5px; visibility: hidden; opacity: 0; transition: opacity 0.2s ease-in-out; }
-        td:hover .procedure-actions, tr:hover .procedure-actions { visibility: visible; opacity: 1; }
-        .procedure-actions button { padding: 5px 10px; border: none; border-radius: 4px; color: white; cursor: pointer; }
-        .edit-btn { background-color: var(--warning-color); }
-        .delete-btn { background-color: var(--danger-color); }
-
-        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background-color: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 500px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
-        .modal-header h3 { margin: 0; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group select, .form-group input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
-        .modal-footer { text-align: right; border-top: 1px solid #ccc; padding-top: 20px; margin-top: 20px; }
-        #saveProcedureBtn { padding: 10px 20px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-
-        @media (max-width: 768px) {
-            .table-card { border-left: none; border-right: none; border-radius: 0; }
-            .table-wrapper { overflow-x: hidden; }
-            table, thead, tbody, th, td, tr { display: block; }
-            thead tr { position: absolute; top: -9999px; left: -9999px; }
-            tr { border-bottom: 2px solid var(--dark-gray); margin-bottom: 15px; }
-            td { border: none; border-bottom: 1px solid #eee; position: relative; padding-left: 40%; min-height: 50px; display: flex; align-items: center; }
-            td:not(:empty)::before { position: absolute; top: 50%; left: 6px; transform: translateY(-50%); width: 35%; padding-right: 10px; white-space: normal; content: attr(data-label); font-weight: bold; color: var(--dark-gray); }
+        .procedure-table {
+            min-width: 300px;
+            max-width: 320px;
+            flex-shrink: 0;
         }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-    <h1>Direcionamento de Cirurgia</h1>
-
-    <div class="main-controls">
-        <input type="text" id="globalSearchInput" placeholder="Buscar em toda a página...">
-        <button id="addProcedureBtn">Novo Procedimento</button>
-        <button id="resetDataBtn">Resetar Dados</button>
-    </div>
-    
-    <div class="tables-container" id="tablesContainer">
-        </div>
-
-    <div class="modal-backdrop" id="procedureModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Adicionar Novo Procedimento</h3>
-                <button class="modal-close" id="modalCloseBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="procedureCategory">Categoria</label>
-                    <select id="procedureCategory"></select>
+    <div id="app" class="max-w-full mx-auto">
+        <header class="mb-8 p-4 bg-white rounded-lg shadow-md">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Direcionamento de Cirurgias</h1>
+                    <p class="text-gray-600 mt-1">Gerencie tabelas e procedimentos de forma interativa.</p>
                 </div>
-                <div class="form-group">
-                    <label for="procedureName">Nome do Procedimento</label>
-                    <input type="text" id="procedureName" placeholder="Ex: Nefrectomia">
+                <div class="mt-4 md:mt-0 flex flex-col sm:flex-row items-center gap-3">
+                     <button id="add-table-btn" class="w-full sm:w-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out">
+                        Criar Nova Tabela
+                    </button>
+                    <button id="save-btn" class="w-full sm:w-auto bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out">
+                        Salvar no Navegador
+                    </button>
+                    <button id="export-btn" class="w-full sm:w-auto bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition duration-300 ease-in-out">
+                        Exportar para Arquivo
+                    </button>
+                     <button id="reset-btn" class="w-full sm:w-auto bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-700 transition duration-300 ease-in-out">
+                        Resetar Dados
+                    </button>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="saveProcedureBtn">Salvar</button>
+             <div class="mt-4 p-3 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-md">
+                <p class="font-bold">Como funciona o salvamento?</p>
+                <p>Suas alterações são salvas diretamente no seu navegador. Clique em <strong class="font-semibold">"Salvar no Navegador"</strong> e seus dados estarão aqui quando você reabrir a página. Use <strong class="font-semibold">"Exportar para Arquivo"</strong> para baixar um arquivo .html com os dados atuais.</p>
+            </div>
+        </header>
+
+        <main id="tables-container" class="flex overflow-x-auto pb-4 gap-6">
+            <!-- As tabelas de procedimentos serão inseridas aqui via JavaScript -->
+        </main>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 id="modal-title" class="text-xl font-semibold mb-4"></h3>
+            <div id="modal-content">
+                <!-- Conteúdo do modal (input ou texto de confirmação) -->
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="modal-cancel" class="bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
+                <button id="modal-confirm" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Confirmar</button>
             </div>
         </div>
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- ESTRUTURA DE DADOS PADRÃO (COMPLETA E CORRETA) ---
-    const defaultProceduresData = {
-        "Urologia": { "UROLOGIA PEQUENO": ["VASECTOMIA", "POSTECTOMIA", "CISTOSCOPIA", "VARICOCELE", "HIDROCELE"], "UROLOGIA MÉDIO": ["MEATOPLASTIA", "PROSTATECTOMIA", "CISTOTOMIA", "ORQUIECTOMIA", "URETERORRENOLITOTRIPSIA", "NEFRECTOMIA TOTAL", "URETROTOMIA", "RTU DE PRÓSTATA", "LOMBOTOMIA"], "UROLOGIA GRANDE": ["RADICAL DE PRÓSTATA", "NEFRECTOMIA", "PIELOPLASTIA", "RTU DE PRÓSTATA", "DEEXOCP"] },
-        "Procedimentos Gerais": { "PEQUENO PROCEDIMENTO": ["DRENAGEM DE ABCESSO", "BRONCOSCOPIA", "VARIZES", "EXERESE DE TUMOR DE PELE", "RECONSTRUÇÃO COM RETALHO MICUTÂNEO", "ENXERTO DE PELE", "EXCISÃO E SUTURA DE LESÃO NA PELE EM Z OU ROTACA", "Linfadenectomia inguinal"], "CÁRDIO": ["REVASCULARIZAÇÃO", "IMPLANTE DE PROTESE VALVAR"], "DESBRIDAMENTO": ["CURATIVO/DESBRIDAMENTO", "RESSUTURA DE PAREDE"] },
-        "Outras Especialidades": { "EXODONTIA": ["EXODONTIA"], "TQT": ["TRAQUEOSTOMIA"], "NEURO": ["MICROCIRURGIA PARA TUMOR/ANEURISMA INTRACRANIANO/CRANIOTOMIA", "ARTRODESE CERVICAL", "DISCECTOMIA CERVICAL/LOMBAR", "RIZOTOMIA"], "OTORRINO": ["AMIGDALECTOMIA", "MASTOIDECTOMIA", "TIREOIDECTOMIA", "SINUSECTOMIA"], "AMPUTAÇÃO": ["AMPUTAÇÃO"], "CPRE": ["COLANGIOPANCREATOGRAFIA"] },
-        "Plástica": { 
-            "PLÁSTICA": ["MAMÁRIA"] 
-        },
-        "Bucomaxilo": { 
-            "BUCOMAXILO": ["QUIELOPLASTIA"] 
-        },
-        "Cirurgia Geral e Vascular": { "CABEÇA E PESCOÇO": ["TIREOIDECTOMIA", "RESSECÇÃO DA REGIÃO CRANIO E BUCO"], "CVL": ["COLECISTECTOMIA VIDEOLAPAROSCÓPICA", "HERNIA/CVL"], "LAPAROTOMIA": ["ENTEROANASTOMOSE", "GASTROPLASTIA", "DUODENOPANCREATECTOMIA", "CORREÇÃO DE ANEURISMA DA AORTA ABDOMINAL"], "FISTULA VENOSA": ["FISTULA/ENEDINO"], "FISTULA ANAL": ["HEMORROIDECTOMIA", "PROCTOLOGIA"], "HERNIA": ["GERAL/MÉDIA/HERNIA"] }
-    };
 
-    let proceduresData;
+    <script>
+        // Objeto com os dados iniciais extraídos do arquivo do usuário
+        const initialData = [
+            { title: "UROLOGIA PEQUENO", procedures: ["VASECTOMIA", "POSTECTOMIA", "CISTOSCOPIA", "VARICOCELE", "HIDROCELE"] },
+            { title: "UROLOGIA MÉDIO", procedures: ["MEATOPLASTIA", "PROSTATECTOMIA", "CISTOTOMIA", "ORQUIECTOMIA", "URETERORRENOLITOTRIPSIA", "NEFRECTOMIA TOTAL", "URETROTOMIA", "RTU DE PRÓSTATA", "LOMBOTOMIA"] },
+            { title: "UROLOGIA GRANDE", procedures: ["RADICAL DE PRÓSTATA", "NEFRECTOMIA", "PIELOPLASTIA", "RTU DE PRÓSTATA"] },
+            { title: "PEQUENO PROCEDIMENTO", procedures: ["DRENAGEMDE ABCESSO", "BRONCOSCOPIA", "VARIZES", "EXERESE DE TUMOR DE PELE", "RECONSTRUÇÃO COM RETALHO MIOCUTÂNIO", "ENXERTO DE PELE", "EXCISÃO E SUTURA DE LESÃO NA PELE EM Z OU ROTACA", "Linfadenectomia inguinal"] },
+            { title: "CÁRDIO", procedures: ["REVASCULARIZAÇÃO", "IMPLANTE DE PROTESE VALVAR"] },
+            { title: "DESBRIDAMENTO", procedures: ["CURATIVO/DESBRIDAMENTO", "RESSUTURA DE PAREDE"] },
+            { title: "EXODONTIA", procedures: ["EXODONTIA"] },
+            { title: "TQT", procedures: ["TRAQUEOSTOMIA"] },
+            { title: "NEURO", procedures: ["MICROCIRURGIA PARA TUMOR/ANEURISMA INTRACRANIANO/CRANIOTOMIA", "ARTRODESE CERVICAL"] },
+            { title: "OTORRINO", procedures: ["AMIGDALECTOMIA"] },
+            { title: "AMPUTAÇÃO", procedures: ["AMPUTAÇÃO"] },
+            { title: "CPRE", procedures: ["COLANGIOPANCREATOGRAFIA"] }
+        ];
 
-    const modal = document.getElementById('procedureModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const categorySelect = document.getElementById('procedureCategory');
-    const nameInput = document.getElementById('procedureName');
-    const saveBtn = document.getElementById('saveProcedureBtn');
-    const tablesContainer = document.getElementById('tablesContainer');
-    let editContext = null;
+        const tablesContainer = document.getElementById('tables-container');
+        const saveBtn = document.getElementById('save-btn');
+        const addTableBtn = document.getElementById('add-table-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+        const modalConfirmBtn = document.getElementById('modal-confirm');
 
-    function saveData() {
-        localStorage.setItem('proceduresData', JSON.stringify(proceduresData));
-    }
+        let onConfirmCallback = null;
 
-    function loadData() {
-        const savedData = localStorage.getItem('proceduresData');
-        try {
+        // --- Funções do Modal ---
+        const showModal = (title, contentHtml, confirmText = 'Confirmar', onConfirm) => {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = contentHtml;
+            modalConfirmBtn.textContent = confirmText;
+            onConfirmCallback = onConfirm;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            // Foco no primeiro input, se houver
+            const input = modal.querySelector('input');
+            if (input) input.focus();
+        };
+
+        const hideModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            onConfirmCallback = null;
+            modalContent.innerHTML = '';
+        };
+
+        modalCancelBtn.addEventListener('click', hideModal);
+
+        modalConfirmBtn.addEventListener('click', () => {
+            if (onConfirmCallback) {
+                onConfirmCallback();
+            }
+        });
+        
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (onConfirmCallback) onConfirmCallback();
+            } else if (e.key === 'Escape') {
+                hideModal();
+            }
+        });
+
+
+        // --- Funções de Renderização ---
+        const createProcedureItemHTML = (text) => {
+            return `
+                <li class="procedure-item bg-white flex justify-between items-center p-3 rounded-md shadow-sm mb-2" data-procedure-name="${text}">
+                    <span class="procedure-text flex-1 pr-2">${text}</span>
+                    <div class="flex items-center gap-2">
+                        <button class="edit-procedure-btn text-gray-500 hover:text-blue-600" title="Editar procedimento">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="delete-procedure-btn text-gray-500 hover:text-red-600" title="Deletar procedimento">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                    </div>
+                </li>
+            `;
+        };
+
+        const createTableHTML = (title, procedures = []) => {
+            const tableEl = document.createElement('div');
+            tableEl.className = 'procedure-table bg-gray-100 rounded-xl p-4 shadow-lg flex flex-col h-full';
+            tableEl.setAttribute('data-table-title', title);
+
+            const proceduresHTML = procedures.map(proc => createProcedureItemHTML(proc)).join('');
+
+            tableEl.innerHTML = `
+                <header class="flex justify-between items-center mb-4 pb-2 border-b-2 border-gray-300">
+                    <h2 class="table-title text-xl font-bold text-gray-700 flex-1 pr-2">${title}</h2>
+                    <div class="flex items-center gap-2">
+                        <button class="edit-table-btn text-gray-500 hover:text-blue-600" title="Editar título da tabela">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                         <button class="delete-table-btn text-gray-500 hover:text-red-600" title="Deletar tabela">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+                        </button>
+                    </div>
+                </header>
+                <ul class="procedure-list flex-grow overflow-y-auto pr-1" style="max-height: 60vh;">
+                    ${proceduresHTML}
+                </ul>
+                <footer class="mt-4">
+                    <button class="add-procedure-btn w-full bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition">
+                        Adicionar Procedimento
+                    </button>
+                </footer>
+            `;
+            return tableEl;
+        };
+        
+        const renderAllTables = () => {
+            tablesContainer.innerHTML = '';
+            const savedData = localStorage.getItem('procedimentosData');
+            let dataToRender = initialData; // Fallback para os dados iniciais
+
             if (savedData) {
-                proceduresData = JSON.parse(savedData);
-            } else {
-                proceduresData = defaultProceduresData;
-            }
-        } catch (e) {
-            console.error("Erro ao carregar dados do LocalStorage:", e);
-            proceduresData = defaultProceduresData;
-        }
-    }
-    
-    function resetData() {
-        if (confirm("Tem certeza que deseja resetar todos os dados? Esta ação não pode ser desfeita e restaurará a tabela original.")) {
-            localStorage.removeItem('proceduresData');
-            loadData();
-            renderTables(proceduresData);
-            populateCategorySelect();
-        }
-    }
-    document.getElementById('resetDataBtn').addEventListener('click', resetData);
-
-    function renderTables(dataToRender) {
-        tablesContainer.innerHTML = '';
-        if (Object.keys(dataToRender).length === 0) { tablesContainer.innerHTML = '<p style="text-align: center; width: 100%;">Nenhum resultado encontrado.</p>'; return; }
-        for (const cardTitle in dataToRender) {
-            const cardData = dataToRender[cardTitle];
-            const columns = Object.keys(cardData);
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'table-card';
-            cardDiv.innerHTML = `<div class="card-header"><h2>${cardTitle}</h2></div><div class="table-wrapper"><table><thead><tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr></thead><tbody></tbody></table></div>`;
-            tablesContainer.appendChild(cardDiv);
-            const tbody = cardDiv.querySelector('tbody');
-            const maxRows = Math.max(0, ...columns.map(col => cardData[col] ? cardData[col].length : 0));
-            for (let i = 0; i < maxRows; i++) {
-                const tr = document.createElement('tr');
-                for (const col of columns) {
-                    const td = document.createElement('td');
-                    td.setAttribute('data-label', col);
-                    const procedure = cardData[col] ? cardData[col][i] : undefined;
-                    if (procedure) {
-                        td.innerHTML = `<div class="procedure-item"><span class="procedure-name">${procedure}</span><div class="procedure-actions"><button class="edit-btn" data-card="${cardTitle}" data-category="${col}" data-index="${i}">Editar</button><button class="delete-btn" data-card="${cardTitle}" data-category="${col}" data-index="${i}">Excluir</button></div></div>`;
-                    }
-                    tr.appendChild(td);
+                 try {
+                    dataToRender = JSON.parse(savedData);
+                } catch (e) {
+                    console.error("Erro ao carregar dados do localStorage. Usando dados iniciais.", e);
                 }
-                tbody.appendChild(tr);
             }
-        }
-    }
-    
-    function populateCategorySelect() {
-        categorySelect.innerHTML = '';
-        for (const cardTitle in proceduresData) {
-            for (const category in proceduresData[cardTitle]) {
-                const option = document.createElement('option');
-                option.value = `${cardTitle}|${category}`;
-                option.textContent = category;
-                categorySelect.appendChild(option);
-            }
-        }
-    }
+            
+            dataToRender.forEach(tableData => {
+                const tableEl = createTableHTML(tableData.title, tableData.procedures);
+                tablesContainer.appendChild(tableEl);
+            });
+        };
 
-    const openModal = () => modal.style.display = 'flex';
-    const closeModal = () => { modal.style.display = 'none'; editContext = null; };
 
-    document.getElementById('addProcedureBtn').addEventListener('click', () => {
-        modalTitle.textContent = 'Adicionar Novo Procedimento';
-        nameInput.value = '';
-        categorySelect.selectedIndex = 0;
-        editContext = null;
-        openModal();
-    });
+        // --- Funções de Manipulação do DOM ---
 
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-    saveBtn.addEventListener('click', () => {
-        const [newCard, newCategory] = categorySelect.value.split('|');
-        const procedureName = nameInput.value.trim().toUpperCase();
-        if (!procedureName) return alert('Por favor, insira o nome.');
-
-        if (editContext) {
-            const { oldCard, oldCategory, index } = editContext;
-            if (oldCard === newCard && oldCategory === newCategory) {
-                proceduresData[oldCard][oldCategory][index] = procedureName;
-            } else {
-                proceduresData[oldCard][oldCategory].splice(index, 1);
-                if (!proceduresData[newCard][newCategory]) {
-                    proceduresData[newCard][newCategory] = [];
+        const handleAddTable = () => {
+            showModal('Criar Nova Tabela', '<input type="text" id="modal-input" class="w-full border rounded p-2" placeholder="Nome da tabela">', 'Criar', () => {
+                const input = document.getElementById('modal-input');
+                const newTitle = input.value.trim();
+                if (newTitle) {
+                    const newTable = createTableHTML(newTitle);
+                    tablesContainer.appendChild(newTable);
+                    hideModal();
+                } else {
+                    alert('O nome da tabela não pode ser vazio.');
                 }
-                proceduresData[newCard][newCategory].push(procedureName);
-            }
-        } else {
-             if (!proceduresData[newCard][newCategory]) {
-                proceduresData[newCard][newCategory] = [];
-            }
-            proceduresData[newCard][newCategory].push(procedureName);
-        }
+            });
+        };
         
-        saveData();
-        document.getElementById('globalSearchInput').value = '';
-        renderTables(proceduresData);
-        closeModal();
-    });
+        const handleEditTableTitle = (button) => {
+            const header = button.closest('header');
+            const tableEl = button.closest('.procedure-table');
+            const titleEl = header.querySelector('.table-title');
+            const currentTitle = titleEl.textContent;
 
-    tablesContainer.addEventListener('click', (e) => {
-        const button = e.target.closest('button');
-        if (!button) return;
-        const { card, category, index } = button.dataset;
-        if (!card) return;
-        const procedureIndex = parseInt(index, 10);
-        
-        if (button.classList.contains('edit-btn')) {
-            const procedureName = proceduresData[card][category][procedureIndex];
-            modalTitle.textContent = 'Editar Procedimento';
-            nameInput.value = procedureName;
-            categorySelect.value = `${card}|${category}`;
-            editContext = { oldCard: card, oldCategory: category, index: procedureIndex };
-            openModal();
-        }
-
-        if (button.classList.contains('delete-btn')) {
-            const procedureName = proceduresData[card][category][procedureIndex];
-            if (confirm(`Tem certeza que deseja excluir "${procedureName}"?`)) {
-                proceduresData[card][category].splice(procedureIndex, 1);
-                saveData();
-                document.getElementById('globalSearchInput').value = '';
-                renderTables(proceduresData);
-            }
-        }
-    });
-
-    document.getElementById('globalSearchInput').addEventListener('keyup', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        if (!searchTerm) {
-            renderTables(proceduresData);
-            return;
-        }
-        const filteredData = {};
-        for (const cardTitle in proceduresData) {
-            for (const category in proceduresData[cardTitle]) {
-                const matchingProcedures = proceduresData[cardTitle][category].filter(p => p.toLowerCase().includes(searchTerm));
-                if (matchingProcedures.length > 0) {
-                    if (!filteredData[cardTitle]) { filteredData[cardTitle] = {}; }
-                    filteredData[cardTitle][category] = matchingProcedures;
+            showModal('Editar Título da Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2" value="${currentTitle}">`, 'Salvar', () => {
+                const input = document.getElementById('modal-input');
+                const newTitle = input.value.trim();
+                if (newTitle && newTitle !== currentTitle) {
+                    titleEl.textContent = newTitle;
+                    tableEl.setAttribute('data-table-title', newTitle);
                 }
+                hideModal();
+            });
+        };
+
+        const handleDeleteTable = (button) => {
+             const tableEl = button.closest('.procedure-table');
+             const title = tableEl.dataset.tableTitle;
+             showModal('Deletar Tabela', `<p>Você tem certeza que quer deletar a tabela "<strong>${title}</strong>"? Esta ação não pode ser desfeita.</p>`, 'Deletar', () => {
+                 tableEl.remove();
+                 hideModal();
+             });
+        };
+
+        const handleAddProcedure = (button) => {
+            const tableEl = button.closest('.procedure-table');
+            const list = tableEl.querySelector('.procedure-list');
+             showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2" placeholder="Nome do procedimento">', 'Adicionar', () => {
+                const input = document.getElementById('modal-input');
+                const newName = input.value.trim();
+                if (newName) {
+                    const newProcedureHTML = createProcedureItemHTML(newName);
+                    list.insertAdjacentHTML('beforeend', newProcedureHTML);
+                }
+                hideModal();
+            });
+        };
+
+        const handleEditProcedure = (button) => {
+            const item = button.closest('.procedure-item');
+            const textSpan = item.querySelector('.procedure-text');
+            const currentName = textSpan.textContent;
+
+            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2" value="${currentName}">`, 'Salvar', () => {
+                const input = document.getElementById('modal-input');
+                const newName = input.value.trim();
+                if (newName && newName !== currentName) {
+                    textSpan.textContent = newName;
+                    item.setAttribute('data-procedure-name', newName);
+                }
+                hideModal();
+            });
+        };
+
+        const handleDeleteProcedure = (button) => {
+            const item = button.closest('.procedure-item');
+            const name = item.dataset.procedureName;
+            showModal('Deletar Procedimento', `<p>Você tem certeza que quer deletar o procedimento "<strong>${name}</strong>"?</p>`, 'Deletar', () => {
+                 item.remove();
+                 hideModal();
+             });
+        };
+
+        // --- Funções para Salvar / Exportar / Resetar ---
+        
+        const saveToLocalStorage = () => {
+            const tables = Array.from(document.querySelectorAll('.procedure-table'));
+            const currentData = tables.map(table => {
+                const title = table.dataset.tableTitle;
+                const procedures = Array.from(table.querySelectorAll('.procedure-item'))
+                                        .map(item => item.dataset.procedureName);
+                return { title, procedures };
+            });
+
+            localStorage.setItem('procedimentosData', JSON.stringify(currentData));
+            showModal('Salvo com Sucesso!', '<p>Suas alterações foram salvas no cache do seu navegador.</p>', 'Ok', hideModal);
+        };
+
+        const exportToFile = () => {
+            // 1. Coletar o estado atual da UI e transformar em dados JSON
+            const tables = Array.from(document.querySelectorAll('.procedure-table'));
+            const currentData = tables.map(table => {
+                const title = table.dataset.tableTitle;
+                const procedures = Array.from(table.querySelectorAll('.procedure-item'))
+                                        .map(item => item.dataset.procedureName);
+                return { title, procedures };
+            });
+
+            // 2. Obter o HTML atual como uma string
+            const fullHtml = document.documentElement.outerHTML;
+
+            // 3. Substituir o objeto 'initialData' no script da string HTML
+            const dataAsJsonString = JSON.stringify(currentData, null, 4);
+            const updatedHtml = fullHtml.replace(
+                /const initialData = \[[\s\S]*?\];/,
+                `const initialData = ${dataAsJsonString};`
+            );
+
+            // 4. Criar um Blob e iniciar o download
+            const blob = new Blob([updatedHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'procedimentos.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showModal('Exportado com Sucesso!', '<p>Um novo arquivo HTML com os dados atuais foi baixado.</p>', 'Ok', hideModal);
+        };
+        
+        const resetData = () => {
+             showModal('Resetar Dados', '<p>Você tem certeza que quer apagar todos os dados salvos no navegador e voltar para o estado inicial? Esta ação não pode ser desfeita.</p>', 'Resetar', () => {
+                localStorage.removeItem('procedimentosData');
+                location.reload();
+             });
+        };
+
+        // --- Event Listeners ---
+        addTableBtn.addEventListener('click', handleAddTable);
+        saveBtn.addEventListener('click', saveToLocalStorage);
+        exportBtn.addEventListener('click', exportToFile);
+        resetBtn.addEventListener('click', resetData);
+
+        tablesContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            if (button.classList.contains('edit-table-btn')) {
+                handleEditTableTitle(button);
+            } else if (button.classList.contains('delete-table-btn')) {
+                handleDeleteTable(button);
+            } else if (button.classList.contains('add-procedure-btn')) {
+                handleAddProcedure(button);
+            } else if (button.classList.contains('edit-procedure-btn')) {
+                handleEditProcedure(button);
+            } else if (button.classList.contains('delete-procedure-btn')) {
+                handleDeleteProcedure(button);
             }
-        }
-        renderTables(filteredData);
-    });
+        });
+        
+        // --- Inicialização ---
+        document.addEventListener('DOMContentLoaded', renderAllTables);
 
-    // --- INICIALIZAÇÃO ---
-    loadData();
-    populateCategorySelect();
-    renderTables(proceduresData);
-});
-</script>
-
+    </script>
 </body>
 </html>
+
