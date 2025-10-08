@@ -67,6 +67,17 @@
                     </button>
                 </div>
             </div>
+            <div class="mt-6">
+                <label for="search-input" class="sr-only">Pesquisar Procedimento</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <input type="text" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Pesquisar por procedimento ou tabela...">
+                </div>
+            </div>
              <div class="mt-4 p-3 bg-blue-100 dark:bg-gray-700 border-l-4 border-blue-500 text-blue-800 dark:text-blue-300 rounded-md">
                 <p class="font-bold">Como funciona o salvamento?</p>
                 <p>Suas alterações são salvas diretamente no seu navegador. Clique em <strong class="font-semibold">"Salvar"</strong> e seus dados estarão aqui quando você reabrir a página.</p>
@@ -123,17 +134,15 @@
         const modalContent = document.getElementById('modal-content');
         const modalCancelBtn = document.getElementById('modal-cancel');
         const modalConfirmBtn = document.getElementById('modal-confirm');
+        const searchInput = document.getElementById('search-input');
 
         let onConfirmCallback = null;
         
         // --- Funções do Tema (Dark Mode) ---
         const applyTheme = (theme) => {
             const isDark = theme === 'dark';
-            // Aplica ou remove a classe 'dark' do elemento <html>
             document.documentElement.classList.toggle('dark', isDark);
-            // Esconde o ícone da lua se o tema for escuro, senão mostra
             moonIcon.classList.toggle('hidden', isDark);
-            // Esconde o ícone do sol se o tema for claro, senão mostra
             sunIcon.classList.toggle('hidden', !isDark);
         };
         
@@ -172,7 +181,7 @@
         });
 
 
-        // --- Funções de Renderização ---
+        // --- Funções de Renderização e Pesquisa ---
         const createProcedureItemHTML = (text) => {
             return `
                 <li class="procedure-item bg-white dark:bg-gray-800 flex justify-between items-center p-3 rounded-md shadow-sm mb-2" data-procedure-name="${text}">
@@ -224,6 +233,23 @@
             let dataToRender = savedData ? JSON.parse(savedData) : initialData;
             dataToRender.forEach(tableData => {
                 tablesContainer.appendChild(createTableHTML(tableData.title, tableData.procedures));
+            });
+        };
+        
+        const handleSearch = () => {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tables = document.querySelectorAll('.procedure-table');
+
+            tables.forEach(table => {
+                const title = table.dataset.tableTitle.toLowerCase();
+                const procedures = Array.from(table.querySelectorAll('.procedure-text')).map(p => p.textContent.toLowerCase());
+                const hasMatch = searchTerm === '' || title.includes(searchTerm) || procedures.some(proc => proc.includes(searchTerm));
+                
+                if (hasMatch) {
+                    table.classList.remove('hidden');
+                } else {
+                    table.classList.add('hidden');
+                }
             });
         };
 
@@ -340,6 +366,8 @@
         saveBtn.addEventListener('click', saveToLocalStorage);
         exportBtn.addEventListener('click', exportToFile);
         resetBtn.addEventListener('click', resetData);
+        searchInput.addEventListener('input', handleSearch);
+        
         tablesContainer.addEventListener('click', (e) => {
             const button = e.target.closest('button');
             if (!button) return;
