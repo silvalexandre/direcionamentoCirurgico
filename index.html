@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Direcionamento de Cirurgia</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Forçar o Tailwind a usar a estratégia de classe para o modo escuro
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -56,7 +62,7 @@
                         Resetar
                     </button>
                      <button id="theme-toggle-btn" title="Alternar tema" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                        <svg id="theme-toggle-moon-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg id="theme-toggle-moon-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                         <svg id="theme-toggle-sun-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     </button>
                 </div>
@@ -122,15 +128,13 @@
         
         // --- Funções do Tema (Dark Mode) ---
         const applyTheme = (theme) => {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
-            } else {
-                document.documentElement.classList.remove('dark');
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
-            }
+            const isDark = theme === 'dark';
+            // Aplica ou remove a classe 'dark' do elemento <html>
+            document.documentElement.classList.toggle('dark', isDark);
+            // Esconde o ícone da lua se o tema for escuro, senão mostra
+            moonIcon.classList.toggle('hidden', isDark);
+            // Esconde o ícone do sol se o tema for claro, senão mostra
+            sunIcon.classList.toggle('hidden', !isDark);
         };
         
         themeToggleBtn.addEventListener('click', () => {
