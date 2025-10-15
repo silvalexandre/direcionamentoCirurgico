@@ -85,6 +85,7 @@
             { title: "CPRE", procedures: ["COLANGIOPANCREATOGRAFIA"], stock: 0, targetStock: 5 }
         ];
 
+        // --- REFERÊNCIAS GLOBAIS ---
         const tablesContainer = document.getElementById('tables-container');
         const saveBtn = document.getElementById('save-btn');
         const addTableBtn = document.getElementById('add-table-btn');
@@ -105,6 +106,7 @@
 
         let onConfirmCallback = null;
         
+        // --- FUNÇÕES ---
         const applyTheme = (theme) => {
             const isDark = theme === 'dark';
             document.documentElement.classList.toggle('dark', isDark);
@@ -133,8 +135,8 @@
             <li class="procedure-item bg-white dark:bg-gray-800 flex justify-between items-center p-3 rounded-md shadow-sm mb-2" data-procedure-name="${text}">
                 <span class="procedure-text flex-1 pr-2 text-gray-800 dark:text-gray-200">${text}</span>
                 <div class="flex items-center gap-2">
-                    <button class="edit-procedure-btn text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" title="Editar procedimento"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                    <button class="delete-procedure-btn text-gray-500 hover:text-red-600 dark:hover:text-red-400" title="Deletar procedimento"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+                    <button class="edit-procedure-btn text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" title="Editar"><svg class="pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                    <button class="delete-procedure-btn text-gray-500 hover:text-red-600 dark:hover:text-red-400" title="Deletar"><svg class="pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
                 </div>
             </li>`;
         
@@ -160,8 +162,8 @@
                         <input type="number" min="0" id="target-stock-${sanitizedTitleId}" class="target-stock-input w-20 text-center bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md border border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" value="${targetStock}">
                     </div>
                     <div class="flex items-center gap-2">
-                        <button class="edit-table-btn text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" title="Editar título da tabela"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                        <button class="delete-table-btn text-gray-500 hover:text-red-600 dark:hover:text-red-400" title="Deletar tabela"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></button>
+                        <button class="edit-table-btn text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" title="Editar título"><svg class="pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                        <button class="delete-table-btn text-gray-500 hover:text-red-600 dark:hover:text-red-400" title="Deletar tabela"><svg class="pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></button>
                     </div>
                 </header>
                 <ul class="procedure-list flex-grow overflow-y-auto pr-1" style="max-height: 60vh;">${proceduresHTML}</ul>
@@ -175,15 +177,15 @@
             const suggestions = currentData.filter(table => table.stock < table.targetStock);
             if (suggestions.length === 0) {
                 suggestionContent.innerHTML = '<p class="text-green-600 dark:text-green-400">Tudo em ordem! Não há kits para confeccionar.</p>';
-                return;
+            } else {
+                let suggestionsHTML = '<ul class="list-disc list-inside space-y-2">';
+                suggestions.forEach(suggestion => {
+                    const needed = suggestion.targetStock - suggestion.stock;
+                    suggestionsHTML += `<li class="text-gray-700 dark:text-gray-300">Confeccionar <strong class="font-semibold text-yellow-600 dark:text-yellow-400">${needed}</strong> kit(s) para <strong class="font-semibold">${suggestion.title}</strong> para atingir o alvo de ${suggestion.targetStock}.</li>`;
+                });
+                suggestionsHTML += '</ul>';
+                suggestionContent.innerHTML = suggestionsHTML;
             }
-            let suggestionsHTML = '<ul class="list-disc list-inside space-y-2">';
-            suggestions.forEach(suggestion => {
-                const needed = suggestion.targetStock - suggestion.stock;
-                suggestionsHTML += `<li class="text-gray-700 dark:text-gray-300">Confeccionar <strong class="font-semibold text-yellow-600 dark:text-yellow-400">${needed}</strong> kit(s) para <strong class="font-semibold">${suggestion.title}</strong> para atingir o alvo de ${suggestion.targetStock}.</li>`;
-            });
-            suggestionsHTML += '</ul>';
-            suggestionContent.innerHTML = suggestionsHTML;
         };
 
         const renderAllTables = () => {
@@ -206,8 +208,9 @@
                  table.querySelectorAll('.procedure-item').forEach(item => {
                      const procName = item.dataset.procedureName.toLowerCase();
                      const isMatch = searchTerm && procName.includes(searchTerm);
-                     item.classList.toggle('bg-yellow-200', isMatch);
-                     item.classList.toggle('dark:bg-yellow-800', isMatch);
+                     // --- CORRIGIDO: Troca de 'yellow' para 'green' ---
+                     item.classList.toggle('bg-green-200', isMatch);
+                     item.classList.toggle('dark:bg-green-800', isMatch);
                      item.classList.toggle('bg-white', !isMatch);
                      item.classList.toggle('dark:bg-gray-800', !isMatch);
                      if (isMatch) tableVisible = true;
@@ -216,7 +219,7 @@
              });
         };
         
-        const handleAddTable = () => showModal('Criar Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome da tabela">`, 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); renderSuggestions(); }});
+        const handleAddTable = () => showModal('Criar Tabela', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome da tabela">', 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); renderSuggestions(); }});
         const handleEditTableTitle = (button) => {
             const tableEl = button.closest('.procedure-table');
             const titleEl = tableEl.querySelector('.table-title');
@@ -265,10 +268,9 @@
         modalCancelBtn.addEventListener('click', hideModal);
         modalConfirmBtn.addEventListener('click', () => { if (onConfirmCallback) onConfirmCallback(); });
         modal.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (onConfirmCallback) onConfirmCallback(); } else if (e.key === 'Escape') { hideModal(); } });
-
+        
         tablesContainer.addEventListener('click', (e) => {
-            const target = e.target;
-            const button = target.closest('button');
+            const button = e.target.closest('button');
             if (!button) return;
             const classList = button.classList;
             if (classList.contains('stock-plus-btn') || classList.contains('stock-minus-btn')) {
@@ -280,7 +282,8 @@
                     tableEl.querySelector('.stock-count-display').textContent = count;
                     renderSuggestions();
                 }
-            } else if (classList.contains('edit-table-btn')) { handleEditTableTitle(button); }
+            } 
+            else if (classList.contains('edit-table-btn')) { handleEditTableTitle(button); }
             else if (classList.contains('delete-table-btn')) { handleDeleteTable(button); }
             else if (classList.contains('add-procedure-btn')) { handleAddProcedure(button); }
             else if (classList.contains('edit-procedure-btn')) { handleEditProcedure(button); }
