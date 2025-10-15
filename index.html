@@ -175,36 +175,32 @@
                 return;
             }
 
-            // --- INÍCIO DA MODIFICAÇÃO ---
+            // --- INÍCIO DA MODIFICAÇÃO PARA O NOVO LAYOUT RESPONSIVO ---
             let suggestionsHTML = `
                 <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-                    <div class="hidden md:grid md:grid-cols-4 bg-gray-200 dark:bg-gray-600 font-semibold uppercase text-sm text-gray-600 dark:text-gray-300">
-                        <div class="px-4 py-3">Kit / Tabela</div>
-                        <div class="px-4 py-3 text-center">Estoque Atual</div>
-                        <div class="px-4 py-3 text-center">Estoque Alvo</div>
-                        <div class="px-4 py-3 text-center">A Confeccionar</div>
-                    </div>
-                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-200 dark:bg-gray-600">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kit / Tabela</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estoque Atual</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estoque Alvo</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">A Confeccionar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             `;
             suggestions.forEach(suggestion => {
                 const needed = suggestion.targetStock - suggestion.stock;
                 suggestionsHTML += `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 items-center">
-                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Kit:</div>
-                        <div class="font-semibold text-gray-800 dark:text-gray-200">${suggestion.title}</div>
-
-                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Estoque Atual:</div>
-                        <div class="md:text-center">${suggestion.stock}</div>
-
-                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Estoque Alvo:</div>
-                        <div class="md:text-center">${suggestion.targetStock}</div>
-
-                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">A Confeccionar:</div>
-                        <div class="md:text-center font-bold text-xl text-yellow-600 dark:text-yellow-400">${needed}</div>
-                    </div>
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">${suggestion.title}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-gray-700 dark:text-gray-300">${suggestion.stock}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-gray-700 dark:text-gray-300">${suggestion.targetStock}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center font-bold text-xl text-yellow-600 dark:text-yellow-400">${needed}</td>
+                            </tr>
                 `;
             });
-            suggestionsHTML += '</div></div>';
+            suggestionsHTML += '</tbody></table></div>';
             suggestionContent.innerHTML = suggestionsHTML;
             // --- FIM DA MODIFICAÇÃO ---
         };
