@@ -43,10 +43,7 @@
                 </div>
             </div>
             <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
-                    <input type="text" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Pesquisar...">
-                </div>
+                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div><input type="text" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Pesquisar..."></div>
             </div>
             <div class="mt-4 p-3 bg-blue-100 dark:bg-gray-700 border-l-4 border-blue-500 text-blue-800 dark:text-blue-300 rounded-md">
                 <p class="font-bold">Como funciona?</p><p>Altere os contadores e o estoque alvo. Suas alterações são salvas automaticamente no navegador. Clique em <strong class="font-semibold">"Salvar"</strong> para confirmar ou <strong class="font-semibold">"Exportar"</strong> para baixar um novo arquivo.</p>
@@ -178,32 +175,38 @@
                 return;
             }
 
+            // --- INÍCIO DA MODIFICAÇÃO ---
             let suggestionsHTML = `
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <thead class="bg-gray-200 dark:bg-gray-600">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase">Kit / Tabela</th>
-                                <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase">Estoque Atual</th>
-                                <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase">Estoque Alvo</th>
-                                <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase">A Confeccionar</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div class="hidden md:grid md:grid-cols-4 bg-gray-200 dark:bg-gray-600 font-semibold uppercase text-sm text-gray-600 dark:text-gray-300">
+                        <div class="px-4 py-3">Kit / Tabela</div>
+                        <div class="px-4 py-3 text-center">Estoque Atual</div>
+                        <div class="px-4 py-3 text-center">Estoque Alvo</div>
+                        <div class="px-4 py-3 text-center">A Confeccionar</div>
+                    </div>
+                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
             `;
             suggestions.forEach(suggestion => {
                 const needed = suggestion.targetStock - suggestion.stock;
                 suggestionsHTML += `
-                    <tr class="text-gray-700 dark:text-gray-300">
-                        <td class="px-4 py-3 font-semibold">${suggestion.title}</td>
-                        <td class="px-4 py-3 text-center">${suggestion.stock}</td>
-                        <td class="px-4 py-3 text-center">${suggestion.targetStock}</td>
-                        <td class="px-4 py-3 text-center font-bold text-xl text-yellow-600 dark:text-yellow-400">${needed}</td>
-                    </tr>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 items-center">
+                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Kit:</div>
+                        <div class="font-semibold text-gray-800 dark:text-gray-200">${suggestion.title}</div>
+
+                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Estoque Atual:</div>
+                        <div class="md:text-center">${suggestion.stock}</div>
+
+                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">Estoque Alvo:</div>
+                        <div class="md:text-center">${suggestion.targetStock}</div>
+
+                        <div class="md:hidden font-semibold text-gray-500 dark:text-gray-400">A Confeccionar:</div>
+                        <div class="md:text-center font-bold text-xl text-yellow-600 dark:text-yellow-400">${needed}</div>
+                    </div>
                 `;
             });
-            suggestionsHTML += '</tbody></table></div>';
+            suggestionsHTML += '</div></div>';
             suggestionContent.innerHTML = suggestionsHTML;
+            // --- FIM DA MODIFICAÇÃO ---
         };
 
         const renderAllTables = () => {
@@ -236,23 +239,23 @@
              });
         };
         
-        const handleAddTable = () => showModal('Criar Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome da tabela">`, 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); renderSuggestions(); }});
+        const handleAddTable = () => showModal('Criar Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome da tabela">`, 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); renderSuggestions(); }});
         const handleEditTableTitle = (button) => {
             const tableEl = button.closest('.procedure-table');
             const titleEl = tableEl.querySelector('.table-title');
             const currentTitle = titleEl.textContent;
-            showModal('Editar Título', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" value="${currentTitle}">`, 'Salvar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { titleEl.textContent = newTitle; tableEl.dataset.tableTitle = newTitle; renderSuggestions(); } hideModal(); });
+            showModal('Editar Título', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" value="${currentTitle}">`, 'Salvar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { titleEl.textContent = newTitle; tableEl.dataset.tableTitle = newTitle; renderSuggestions(); } hideModal(); });
         };
         const handleDeleteTable = (button) => showModal('Deletar Tabela', `<p>Deletar "<strong>${button.closest('.procedure-table').dataset.tableTitle}</strong>"?</p>`, 'Deletar', () => { button.closest('.procedure-table').remove(); hideModal(); renderSuggestions(); });
         const handleAddProcedure = (button) => {
             const list = button.closest('.procedure-table').querySelector('.procedure-list');
-            showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome do procedimento">', 'Adicionar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { list.insertAdjacentHTML('beforeend', createProcedureItemHTML(newName)); } hideModal(); });
+            showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome do procedimento">', 'Adicionar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { list.insertAdjacentHTML('beforeend', createProcedureItemHTML(newName)); } hideModal(); });
         };
         const handleEditProcedure = (button) => {
             const item = button.closest('.procedure-item');
             const textSpan = item.querySelector('.procedure-text');
             const currentName = textSpan.textContent;
-            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" value="${currentName}">`, 'Salvar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { textSpan.textContent = newName; item.dataset.procedureName = newName; } hideModal(); });
+            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500" value="${currentName}">`, 'Salvar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { textSpan.textContent = newName; item.dataset.procedureName = newName; } hideModal(); });
         };
         const handleDeleteProcedure = (button) => showModal('Deletar Procedimento', `<p>Deletar "<strong>${button.closest('.procedure-item').dataset.procedureName}</strong>"?</p>`, 'Deletar', () => { button.closest('.procedure-item').remove(); hideModal(); });
         
