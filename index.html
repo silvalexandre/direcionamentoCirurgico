@@ -233,7 +233,6 @@
             });
         };
         
-        // --- MODIFIED FUNCTION ---
         const handleSearch = () => {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const tables = document.querySelectorAll('.procedure-table');
@@ -243,24 +242,18 @@
                 const procedureItems = table.querySelectorAll('.procedure-item');
                 let tableShouldBeVisible = false;
 
-                // Check if the table title itself is a match
                 if (title.includes(searchTerm)) {
                     tableShouldBeVisible = true;
                 }
 
-                // Now check and highlight individual procedures
                 procedureItems.forEach(item => {
                     const procedureName = item.dataset.procedureName.toLowerCase();
-                    
-                    // Define highlight and normal classes
                     const highlightClasses = ['bg-green-200', 'dark:bg-green-800'];
                     const normalClasses = ['bg-white', 'dark:bg-gray-800'];
 
-                    // Reset styles by removing highlight and ensuring normal style
                     item.classList.remove(...highlightClasses);
                     item.classList.add(...normalClasses);
 
-                    // If a match is found, apply highlight and flag the table for visibility
                     if (searchTerm !== '' && procedureName.includes(searchTerm)) {
                         item.classList.remove(...normalClasses);
                         item.classList.add(...highlightClasses);
@@ -268,7 +261,6 @@
                     }
                 });
 
-                // Finally, set table visibility
                 if (tableShouldBeVisible || searchTerm === '') {
                     table.classList.remove('hidden');
                 } else {
@@ -279,9 +271,11 @@
 
         // --- Funções de Manipulação do DOM ---
         const handleAddTable = () => {
-            showModal('Criar Nova Tabela', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" placeholder="Nome da tabela">', 'Criar', () => {
+            // --- MODIFIED LINE --- Added style="text-transform: uppercase"
+            showModal('Criar Nova Tabela', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" placeholder="Nome da tabela" style="text-transform: uppercase">', 'Criar', () => {
                 const input = document.getElementById('modal-input');
-                const newTitle = input.value.trim();
+                // --- MODIFIED LINE --- Added .toUpperCase()
+                const newTitle = input.value.trim().toUpperCase();
                 if (newTitle) {
                     tablesContainer.appendChild(createTableHTML(newTitle));
                     hideModal();
@@ -295,9 +289,11 @@
             const tableEl = button.closest('.procedure-table');
             const titleEl = tableEl.querySelector('.table-title');
             const currentTitle = titleEl.textContent;
-            showModal('Editar Título da Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" value="${currentTitle}">`, 'Salvar', () => {
+            // --- MODIFIED LINE --- Added style="text-transform: uppercase"
+            showModal('Editar Título da Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" value="${currentTitle}" style="text-transform: uppercase">`, 'Salvar', () => {
                 const input = document.getElementById('modal-input');
-                const newTitle = input.value.trim();
+                // --- MODIFIED LINE --- Added .toUpperCase()
+                const newTitle = input.value.trim().toUpperCase();
                 if (newTitle && newTitle !== currentTitle) {
                     titleEl.textContent = newTitle;
                     tableEl.setAttribute('data-table-title', newTitle);
@@ -317,9 +313,11 @@
 
         const handleAddProcedure = (button) => {
             const list = button.closest('.procedure-table').querySelector('.procedure-list');
-             showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" placeholder="Nome do procedimento">', 'Adicionar', () => {
+             // --- MODIFIED LINE --- Added style="text-transform: uppercase"
+             showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" placeholder="Nome do procedimento" style="text-transform: uppercase">', 'Adicionar', () => {
                 const input = document.getElementById('modal-input');
-                const newName = input.value.trim();
+                // --- MODIFIED LINE --- Added .toUpperCase()
+                const newName = input.value.trim().toUpperCase();
                 if (newName) {
                     list.insertAdjacentHTML('beforeend', createProcedureItemHTML(newName));
                 }
@@ -331,9 +329,11 @@
             const item = button.closest('.procedure-item');
             const textSpan = item.querySelector('.procedure-text');
             const currentName = textSpan.textContent;
-            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" value="${currentName}">`, 'Salvar', () => {
+            // --- MODIFIED LINE --- Added style="text-transform: uppercase"
+            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" value="${currentName}" style="text-transform: uppercase">`, 'Salvar', () => {
                 const input = document.getElementById('modal-input');
-                const newName = input.value.trim();
+                // --- MODIFIED LINE --- Added .toUpperCase()
+                const newName = input.value.trim().toUpperCase();
                 if (newName && newName !== currentName) {
                     textSpan.textContent = newName;
                     item.setAttribute('data-procedure-name', newName);
