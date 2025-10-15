@@ -43,7 +43,10 @@
                 </div>
             </div>
             <div class="mt-6">
-                <div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div><input type="text" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Pesquisar..."></div>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                    <input type="text" id="search-input" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="Pesquisar...">
+                </div>
             </div>
             <div class="mt-4 p-3 bg-blue-100 dark:bg-gray-700 border-l-4 border-blue-500 text-blue-800 dark:text-blue-300 rounded-md">
                 <p class="font-bold">Como funciona?</p><p>Altere os contadores e o estoque alvo. Suas alterações são salvas automaticamente no navegador. Clique em <strong class="font-semibold">"Salvar"</strong> para confirmar ou <strong class="font-semibold">"Exportar"</strong> para baixar um novo arquivo.</p>
@@ -142,6 +145,8 @@
             tableEl.dataset.stockCount = stockCount;
             tableEl.dataset.targetStock = targetStock;
             const proceduresHTML = procedures.map(proc => createProcedureItemHTML(proc)).join('');
+            const sanitizedTitleId = title.replace(/\s+/g, '-');
+            
             tableEl.innerHTML = `
                 <header class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b-2 border-gray-300 dark:border-gray-600">
                     <h2 class="table-title text-xl font-bold text-gray-700 dark:text-gray-200">${title}</h2>
@@ -151,8 +156,8 @@
                         <button class="stock-plus-btn bg-green-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-xl hover:bg-green-600 transition">+</button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label for="target-stock-${title.replace(/\s+/g, '-')}" class="text-sm font-semibold">Alvo:</label>
-                        <input type="number" min="0" id="target-stock-${title.replace(/\s+/g, '-')}" class="target-stock-input w-20 text-center bg-white dark:bg-gray-600 rounded-md border border-gray-300 dark:border-gray-500" value="${targetStock}">
+                        <label for="target-stock-${sanitizedTitleId}" class="text-sm font-semibold">Alvo:</label>
+                        <input type="number" min="0" id="target-stock-${sanitizedTitleId}" class="target-stock-input w-20 text-center bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md border border-gray-300 dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" value="${targetStock}">
                     </div>
                     <div class="flex items-center gap-2">
                         <button class="edit-table-btn text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" title="Editar título da tabela"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
@@ -203,40 +208,38 @@
                      const isMatch = searchTerm && procName.includes(searchTerm);
                      item.classList.toggle('bg-yellow-200', isMatch);
                      item.classList.toggle('dark:bg-yellow-800', isMatch);
+                     item.classList.toggle('bg-white', !isMatch);
+                     item.classList.toggle('dark:bg-gray-800', !isMatch);
                      if (isMatch) tableVisible = true;
                  });
                  table.classList.toggle('hidden', !tableVisible && searchTerm);
              });
         };
-
-        const handleAddTable = () => showModal('Criar Tabela', '<input type="text" id="modal-input" class="w-full ... uppercase">', 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); }});
+        
+        const handleAddTable = () => showModal('Criar Tabela', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome da tabela">`, 'Criar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { tablesContainer.appendChild(createTableHTML(newTitle)); hideModal(); renderSuggestions(); }});
         const handleEditTableTitle = (button) => {
             const tableEl = button.closest('.procedure-table');
             const titleEl = tableEl.querySelector('.table-title');
             const currentTitle = titleEl.textContent;
-            showModal('Editar Título', `<input type="text" id="modal-input" class="w-full ... uppercase" value="${currentTitle}">`, 'Salvar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { titleEl.textContent = newTitle; tableEl.dataset.tableTitle = newTitle; } hideModal(); });
+            showModal('Editar Título', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" value="${currentTitle}">`, 'Salvar', () => { const newTitle = document.getElementById('modal-input').value.trim().toUpperCase(); if(newTitle) { titleEl.textContent = newTitle; tableEl.dataset.tableTitle = newTitle; renderSuggestions(); } hideModal(); });
         };
         const handleDeleteTable = (button) => showModal('Deletar Tabela', `<p>Deletar "<strong>${button.closest('.procedure-table').dataset.tableTitle}</strong>"?</p>`, 'Deletar', () => { button.closest('.procedure-table').remove(); hideModal(); renderSuggestions(); });
         const handleAddProcedure = (button) => {
             const list = button.closest('.procedure-table').querySelector('.procedure-list');
-            showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full ... uppercase">', 'Adicionar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { list.insertAdjacentHTML('beforeend', createProcedureItemHTML(newName)); } hideModal(); });
+            showModal('Adicionar Procedimento', '<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" placeholder="Nome do procedimento">', 'Adicionar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { list.insertAdjacentHTML('beforeend', createProcedureItemHTML(newName)); } hideModal(); });
         };
         const handleEditProcedure = (button) => {
             const item = button.closest('.procedure-item');
             const textSpan = item.querySelector('.procedure-text');
             const currentName = textSpan.textContent;
-            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full ... uppercase" value="${currentName}">`, 'Salvar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { textSpan.textContent = newName; item.dataset.procedureName = newName; } hideModal(); });
+            showModal('Editar Procedimento', `<input type="text" id="modal-input" class="w-full border rounded p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 uppercase" value="${currentName}">`, 'Salvar', () => { const newName = document.getElementById('modal-input').value.trim().toUpperCase(); if(newName) { textSpan.textContent = newName; item.dataset.procedureName = newName; } hideModal(); });
         };
         const handleDeleteProcedure = (button) => showModal('Deletar Procedimento', `<p>Deletar "<strong>${button.closest('.procedure-item').dataset.procedureName}</strong>"?</p>`, 'Deletar', () => { button.closest('.procedure-item').remove(); hideModal(); });
         
         const getCurrentData = () => Array.from(document.querySelectorAll('.procedure-table')).map(table => ({ title: table.dataset.tableTitle, procedures: Array.from(table.querySelectorAll('.procedure-item')).map(item => item.dataset.procedureName), stock: parseInt(table.dataset.stockCount, 10) || 0, targetStock: parseInt(table.dataset.targetStock, 10) || 10 }));
         const saveToLocalStorage = () => { localStorage.setItem('procedimentosData', JSON.stringify(getCurrentData())); showModal('Salvo!', 'Suas alterações foram salvas.', 'Ok', hideModal); };
         const exportToFile = () => {
-            const currentData = getCurrentData();
-            const fullHtml = document.documentElement.outerHTML;
-            const dataAsJsonString = JSON.stringify(currentData, null, 4);
-            const updatedHtml = fullHtml.replace(/const initialData = \[[\s\S]*?\];/, `const initialData = ${dataAsJsonString};`);
-            const blob = new Blob([updatedHtml], { type: 'text/html' });
+            const blob = new Blob([document.documentElement.outerHTML.replace(/const initialData = \[[\s\S]*?\];/, `const initialData = ${JSON.stringify(getCurrentData(), null, 4)};`)], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url; a.download = 'procedimentos.html';
@@ -263,12 +266,10 @@
         modalConfirmBtn.addEventListener('click', () => { if (onConfirmCallback) onConfirmCallback(); });
         modal.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); if (onConfirmCallback) onConfirmCallback(); } else if (e.key === 'Escape') { hideModal(); } });
 
-        // --- CORRIGIDO: Listener de eventos unificado para as tabelas ---
         tablesContainer.addEventListener('click', (e) => {
             const target = e.target;
             const button = target.closest('button');
             if (!button) return;
-
             const classList = button.classList;
             if (classList.contains('stock-plus-btn') || classList.contains('stock-minus-btn')) {
                 const tableEl = button.closest('.procedure-table');
@@ -279,14 +280,13 @@
                     tableEl.querySelector('.stock-count-display').textContent = count;
                     renderSuggestions();
                 }
-            } 
-            else if (classList.contains('edit-table-btn')) handleEditTableTitle(button);
-            else if (classList.contains('delete-table-btn')) handleDeleteTable(button);
-            else if (classList.contains('add-procedure-btn')) handleAddProcedure(button);
-            else if (classList.contains('edit-procedure-btn')) handleEditProcedure(button);
-            else if (classList.contains('delete-procedure-btn')) handleDeleteProcedure(button);
+            } else if (classList.contains('edit-table-btn')) { handleEditTableTitle(button); }
+            else if (classList.contains('delete-table-btn')) { handleDeleteTable(button); }
+            else if (classList.contains('add-procedure-btn')) { handleAddProcedure(button); }
+            else if (classList.contains('edit-procedure-btn')) { handleEditProcedure(button); }
+            else if (classList.contains('delete-procedure-btn')) { handleDeleteProcedure(button); }
         });
-
+        
         tablesContainer.addEventListener('input', (e) => {
             const target = e.target;
             if (target.classList.contains('target-stock-input')) {
